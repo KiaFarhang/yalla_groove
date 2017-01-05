@@ -15,6 +15,7 @@
     "gulp": "^3.9.1",
     "gulp-autoprefixer": "^3.1.1",
     "gulp-babel": "^6.1.2",
+    "gulp-concat": "^2.6.1",
     "gulp-cssnano": "^2.1.2",
     "gulp-nodemon": "^2.2.1",
     "gulp-sass": "^2.3.2",
@@ -23,9 +24,15 @@
     "gulp-uncss": "^1.0.6"
   },
   "dependencies": {
+    "body-parser": "^1.15.2",
+    "cron": "^1.1.1",
     "dotenv": "^2.0.0",
     "express": "^4.14.0",
     "html-to-text": "^2.1.3",
+    "jsdom": "^9.8.3",
+    "pg": "^6.1.2",
     "request": "^2.79.0",
+    "serve-favicon": "^2.3.2"
   }
 }
+
