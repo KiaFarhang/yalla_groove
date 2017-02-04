@@ -2,7 +2,6 @@
 
 const express = require('express');
 const favicon = require('serve-favicon');
-const bodyParser = require('body-parser');
 
 require('dotenv').config();
 
@@ -12,9 +11,6 @@ let options = {
     root: __dirname
 };
 // app.use(favicon(__dirname + '/dist/img/favicon.ico'));
-
-let jsonParser = bodyParser.json();
-let urlencodedParser = bodyParser.urlencoded({ extended: false });
 
 app.use(express.static('dist'));
 
