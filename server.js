@@ -2,33 +2,45 @@
 
 const express = require('express');
 
+var bodyParser = require('body-parser');
+
+
 require('dotenv').config();
 
 const database = require('./src/js/database.js');
 const groove = require('./src/js/groove.js');
+const yalla = require('./src/js/yalla.js');
 
 var app = express();
+app.use(bodyParser.json());
 
 let options = {
     root: __dirname
 };
 
-// app.use(express.static('dist'));
+app.post('/', function(request, response) {
 
+    console.log('new request received');
 
-// app.get('/', function(request, response) {
-//     // res.sendfile('dist/index.html', options);
-// });
+    let ticket = request.body.number;
 
-// app.listen(8080);
+    response.send('Thanks!');
 
-
-let ticketExists;
-
-groove.fetchTicket(1667).then(function(result){
-	ticketExists = result;
-	console.log(ticketExists);
-	// console.log(ticketExists[message_count]);
-}).catch(function(error) {
-
+    setTimeout(function() {
+        groove.fetchTicket(ticket).then(function(result) {
+            if (result.messageCount == 1) {
+                database.checkForEmail(result).then(function(result) {
+                    yalla.sendPriority(result).then(function(result) {
+                        if (result === true) {
+                            console.log('Successfully sent priority');
+                        };
+                    });
+                });
+            }
+        }).catch(function(reason) {
+            console.log(`Error: ${reason}`);
+        });
+    }, 600000);
 });
+
+app.listen(8080);

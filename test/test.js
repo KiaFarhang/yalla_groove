@@ -13,6 +13,7 @@ const expect = chai.expect;
 
 const groove = require('../src/js/groove.js');
 const database = require('../src/js/database.js');
+const yalla = require('../src/js/yalla.js');
 
 describe('Groove', function() {
     it('should exist', function() {
@@ -26,33 +27,33 @@ describe('Groove', function() {
 
         let ticketExists = fetchTicket(1667);
 
-        describe('Ticket', function() {
-        	it('should reject if ticket number is not found', function(){
-        		return expect(fetchTicket(546556513)).to.be.rejectedWith('did not get 200 from Groove');
-        		return expect(fetchTicket('foo')).to.be.rejectedWith('did not get 200 from Groove');
-        	});
+        describe('Message', function() {
+            it('should reject if ticket number is not found', function() {
+                return expect(fetchTicket(546556513)).to.be.rejectedWith('did not get 200 from Groove');
+                return expect(fetchTicket('foo')).to.be.rejectedWith('did not get 200 from Groove');
+            });
             it('should be an object', function() {
                 return expect(ticketExists).to.eventually.be.an('object');
             });
             it('should have a message count property', function() {
-                return expect(ticketExists).to.eventually.have.property('message_count');
+                return expect(ticketExists).to.eventually.have.property('messageCount');
             });
-            it('should have a customer link property', function() {
-            	return expect(ticketExists).to.eventually.have.deep.property('.links.customer.href');
-            })
-
-            let messageCount, customerLink;
-
-            fetchTicket(1667).then(function(result){
-            	messageCount = result.message_count;
-            	customerLink = result.links.customer.href;
+            it('should have an email property', function() {
+                return expect(ticketExists).to.eventually.have.property('email');
             });
 
-            it('should have the message count be a number', function(){
-            	return expect(messageCount).to.be.a('number');
+            let messageCount, customerEmail;
+
+            fetchTicket(1667).then(function(result) {
+                messageCount = result.messageCount;
+                customerEmail = result.email;
             });
-            it('should have the customer link be a string', function(){
-            	return expect(customerLink).to.be.a('string');
+
+            it('should have the message count be a number', function() {
+                return expect(messageCount).to.be.a('number');
+            });
+            it('should have the email be a string', function() {
+                return expect(customerEmail).to.be.a('string');
             });
         });
     });
@@ -69,46 +70,55 @@ describe('Database', function() {
             expect(checkForEmail).to.not.be.undefined;
         });
 
-        let stringInDb = checkForEmail('kfarhang0@gmail.com');
-        let stringNotInDb = checkForEmail('ammillerbernd@gmail.com');
+        let emailInDb = checkForEmail({ messageCount: 1, email: 'kfarhang0@gmail.com' });
+        let emailNotInDb = checkForEmail({ messageCount: 1, email: 'ammillerbernd@gmail.com' });
 
         it('should successfully connect to the database', function() {
-            return expect(stringInDb).to.not.be.rejectedWith('could not connect to db');
-            return expect(stringNotInDb).to.not.be.rejectedWith('could not connect to db');
+            return expect(emailInDb).to.not.be.rejectedWith('could not connect to db');
+            return expect(emailNotInDb).to.not.be.rejectedWith('could not connect to db');
         });
         it('should succesfully query the database', function() {
-            return expect(stringInDb).to.not.be.rejectedWith('error querying DB');
-            return expect(stringNotInDb).to.not.be.rejectedWith('error querying DB');
+            return expect(emailInDb).to.not.be.rejectedWith('error querying DB');
+            return expect(emailNotInDb).to.not.be.rejectedWith('error querying DB');
         });
-        it('should return an empty array if the email is not in the database', function() {
-            return expect(stringNotInDb).to.eventually.be.empty;
+        it('should always return the message object', function() {
+            return expect(emailInDb).to.eventually.be.an('object');
+            return expect(emailNotInDb).to.eventually.be.an('object');
         });
-        it('should return an array of objects if the email is in the database', function() {
-            return expect(stringInDb).to.eventually.not.be.empty;
-
-            for (let i = 0; i < stringInDb.length; i++) {
-                return expect(stringInDb[i].to.eventually.be.an('object'));
-            }
-        });
-
-        describe('Object', function() {
-
-            let object, manager;
-
-            stringInDb.then(function(result) {
-                object = result[0];
-                manager = object.mgr;
+        describe('Message', function() {
+            it('should always contain email, messageCount and manager properties', function() {
+                return expect(emailInDb).to.eventually.have.all.keys('email', 'messageCount', 'manager');
+                return expect(emailNotInDb).to.eventually.have.all.keys('email', 'messageCount', 'manager');
             });
-
-            it('should have only the mgr property', function() {
-                return expect(object).to.have.all.keys('mgr');
-                return expect(object).to.not.have.all.keys('mgr', 'foo');
-            });
-
-            it('should contain a string for the mgr property', function() {
-                return expect(manager).to.be.a('string');
+            it('should set the manager to Kia if the email was not in the database', function() {
+                return expect(emailInDb).to.eventually.have.property('manager', 'uMpU6Mn4GwXc2');
             });
         });
-
     });
 });
+
+describe('Yalla', function() {
+    it('should exist', function() {
+        expect(yalla).to.not.be.undefined;
+    });
+    describe('sendPriority', function() {
+
+        const sendPriority = yalla.sendPriority;
+
+        it('should exist', function() {
+            expect(sendPriority).to.not.be.undefined;
+        });
+
+        let send = sendPriority({ email: 'kfarhang0@gmail.com', manager: 'uMpU6Mn4GwXc2' });
+
+        it('should successfully connect to Yalla', function() {
+            return expect(send).to.not.be.rejectedWith('error connecting to Yalla');
+        });
+        it('should get a 200 from Yalla', function() {
+            return expect(send).to.not.be.rejectedWith('did not get 200 from Yalla');
+        });
+        it('should return true when the priority is succesfully added', function(){
+        	return expect(send).to.eventually.equal(true);
+        });
+    });
+})

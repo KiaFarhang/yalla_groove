@@ -1,3 +1,5 @@
+'use strict';
+
 let pg = require('pg');
 require('dotenv').config();
 
@@ -14,18 +16,25 @@ let pgConfig = {
 let pool = new pg.Pool(pgConfig);
 
 module.exports = {
-    checkForEmail: function(email) {
+    checkForEmail: function(message) {
         return new Promise((resolve, reject) => {
             pool.connect(function(error, client, done) {
                 if (error) {
                     return reject('could not connect to db');
                 }
-                client.query(`SELECT mgr FROM clients WHERE email @> '{"${email}"}'`, function(error, result) {
+                client.query(`SELECT mgr FROM clients WHERE email @> '{"${message.email}"}'`, function(error, result) {
                     done();
                     if (error) {
                         return reject('error querying DB');
                     }
-                    return resolve(result.rows);
+
+                    if(result.rows.length == 0){
+                        message.manager = 'uMpU6Mn4GwXc2';
+                        return resolve(message);
+                    }
+
+                    message.manager = result.rows[0].mgr;
+                    return resolve(message);
                 });
             });
         });

@@ -1,3 +1,5 @@
+'use strict';
+
 require('dotenv').config();
 var request = require('request');
 
@@ -22,9 +24,18 @@ module.exports = {
             	if (response.statusCode != 200){
             		return reject('did not get 200 from Groove');
             	}
-            	return resolve(JSON.parse(body).ticket);
 
-            })
+            	let json = JSON.parse(body).ticket;
+
+            	let customerLink = json.links.customer.href;
+
+            	let message = {
+            		messageCount: json.message_count,
+            		email: customerLink.substring(customerLink.lastIndexOf('/') + 1)
+            	};
+
+            	return resolve(message);
+            });
         });
     }
 }
