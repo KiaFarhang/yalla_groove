@@ -31,7 +31,8 @@ module.exports = {
 
             	let message = {
             		messageCount: json.message_count,
-            		email: customerLink.substring(customerLink.lastIndexOf('/') + 1)
+            		email: customerLink.substring(customerLink.lastIndexOf('/') + 1),
+            		state: json.state
             	};
 
             	return resolve(message);

@@ -28,7 +28,7 @@ app.post('/', function(request, response) {
 
     setTimeout(function() {
         groove.fetchTicket(ticket).then(function(result) {
-            if (result.messageCount == 1) {
+            if (result.messageCount == 1 && result.state == 'opened') {
                 database.checkForEmail(result).then(function(result) {
                     yalla.sendPriority(result).then(function(result) {
                         if (result === true) {

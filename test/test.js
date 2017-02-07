@@ -41,6 +41,9 @@ describe('Groove', function() {
             it('should have an email property', function() {
                 return expect(ticketExists).to.eventually.have.property('email');
             });
+            it('should have a state property', function(){
+            	return expect(ticketExists).to.eventually.have.property('state');
+            });
 
             let messageCount, customerEmail;
 
